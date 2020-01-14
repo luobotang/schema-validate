@@ -1,0 +1,22 @@
+{
+  "name": "@luobotang/schema-validate",
+  "version": "0.1.0",
+  "description": "data validate",
+  "main": "index.js",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "keywords": [
+    "schema",
+    "validation"
+  ],
+  "license": "MIT",
+  "files": [
+    "lib"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-buble": "^0.21.0",
+    "@rollup/plugin-commonjs": "^11.0.1",
+    "rollup": "^1.29.0"
+  }
+}
