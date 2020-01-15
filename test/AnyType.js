@@ -3,7 +3,7 @@ const { T } = require('../lib/index')
 const assert = require('assert')
 
 describe('AnyType', () => {
-  it('should be OK', () => {
+  it('check()', () => {
     const t = AnyType(
       T.string().email(),
       T.date().min('2019/01/01')

@@ -2,15 +2,14 @@ const StringType = require('../lib/StringType')
 const assert = require('assert')
 
 describe('StringType', () => {
-  it('should create success', () => {
+  it('create', () => {
     const t = StringType()
     assert.equal(typeof t.check, 'function', 't.check()')
     assert.equal(typeof t.rule, 'function', 't.rule()')
     assert.equal(typeof t.required, 'function', 't.required()')
   })
 
-  it('should use rule success', () => {
-    
+  it('rules', () => {
     function checkRule(ruleName, success, fail) {
       const t = StringType()
       assert.equal(t[ruleName]('error').check(success).hasError, false, `${ruleName}() check '${success}' should not hasError`)
@@ -27,5 +26,11 @@ describe('StringType', () => {
     checkRule('hex', '#fff', 'abcd')
 
     // TODO 其他需要额外参数的规则
+  })
+
+  it('.same()', () => {
+    const t = StringType().same('password', 'same')
+    assert.equal(t.check('123', {password: '123'}).hasError, false, 'OK')
+    assert.equal(t.check('123', {password: '456'}).hasError, true, 'error')
   })
 })

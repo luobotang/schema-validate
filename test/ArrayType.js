@@ -3,13 +3,13 @@ const { T } = require('../lib/index')
 const assert = require('assert')
 
 describe('ArrayType', () => {
-  it('should check array range OK', () => {
+  it('check()', () => {
     const t = ArrayType().range(2, 4)
     assert.equal(t.check([1,2]).hasError, false, 'range - OK')
     assert.equal(t.check([1,2,3,4,5]).hasError, true, 'range - X')
   })
 
-  it('should check array unique OK', () => {
+  it('unique() & uniqueKey()', () => {
     const t = ArrayType().unique()
     assert.equal(t.check([1,2,3,4]).hasError, false, 'unique - OK')
     assert.equal(t.check([1,2,2,1]).hasError, true, 'unique - X')
@@ -19,7 +19,7 @@ describe('ArrayType', () => {
     assert.equal(t2.check([{id:1},{id:2},{id:2}]).hasError, true, 'uniqueKey - X')
   })
 
-  it('should check array of OK', () => {
+  it('of()', () => {
     const t = ArrayType().of(
       T.object().shape({
         name: T.string('string').required('required'),

@@ -1,8 +1,8 @@
 const { SchemaModel, T } = require('../lib/index')
 const assert = require('assert')
 
-describe('Schema', () => {
-  it('should be OK', () => {
+describe('schema-validate', () => {
+  it('SchemaModel.check()', () => {
     const m = SchemaModel({
       name: T.string('string').required('required').letterOnly('letterOnly'),
       age: T.number('number').min(18, 'min').max(30, 'max')
@@ -39,7 +39,7 @@ describe('Schema', () => {
     )
   })
 
-  it('should clone type OK', () => {
+  it('type.clone()', () => {
     const t1 = T.string().minlen(2)
     const t2 = t1.clone().maxlen(4).required()
     const m = SchemaModel({
@@ -52,5 +52,15 @@ describe('Schema', () => {
     })
     assert.equal(r.name1.hasError, false, 't1 OK')
     assert.equal(r.name2.hasError, true, 't1 error')
+  })
+
+  it('string().same()', () => {
+    const m = SchemaModel({
+      password: T.string().required().hasNumber().hasLetter().range(6, 16),
+      password2: T.string().required().same('password', 'same')
+    })
+
+    assert.equal(m.validate({ password: 'abc123', password2: 'abc123' }).hasError, false, 'OK')
+    assert.equal(m.validate({ password: 'abc123', password2: 'def456' }).errorMessage, 'same', 'error')
   })
 })

@@ -2,7 +2,7 @@ const BooleanType = require('../lib/BooleanType')
 const assert = require('assert')
 
 describe('BooleanType', () => {
-  it('should be OK', () => {
+  it('check()', () => {
     const t = BooleanType('error')
     assert.equal(t.check(true).hasError, false, 'true - OK')
     assert.equal(t.check(false).hasError, false, 'false - OK')
