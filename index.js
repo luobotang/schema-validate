@@ -1,4 +1,4 @@
-/* @luobotang/schema-validate v0.1.1 */
+/* @luobotang/schema-validate v0.1.2 */
 
 'use strict';
 
@@ -175,6 +175,10 @@ var StringType = /*@__PURE__*/(function (Type) {
 
   StringType.prototype.maxlen = function maxlen (maxLength, errorMessage) {
     return this.rule(function (value) { return value.length <= maxLength; }, errorMessage)
+  };
+
+  StringType.prototype.same = function same (field, errorMessage) {
+    return this.rule(function (value, data) { return data ? data[field] === value : false; }, errorMessage)
   };
 
   return StringType;

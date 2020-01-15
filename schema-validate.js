@@ -1,4 +1,4 @@
-/* @luobotang/schema-validate v0.1.1 */
+/* @luobotang/schema-validate v0.1.2 */
 
 var SchemaValidate = (function (exports) {
   'use strict';
@@ -174,6 +174,10 @@ var SchemaValidate = (function (exports) {
 
     StringType.prototype.maxlen = function maxlen (maxLength, errorMessage) {
       return this.rule(function (value) { return value.length <= maxLength; }, errorMessage)
+    };
+
+    StringType.prototype.same = function same (field, errorMessage) {
+      return this.rule(function (value, data) { return data ? data[field] === value : false; }, errorMessage)
     };
 
     return StringType;
