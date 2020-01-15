@@ -38,4 +38,19 @@ describe('Schema', () => {
       'age - max'
     )
   })
+
+  it('should clone type OK', () => {
+    const t1 = T.string().minlen(2)
+    const t2 = t1.clone().maxlen(4).required()
+    const m = SchemaModel({
+      name1: t1,
+      name2: t2
+    })
+    const r = m.check({
+      name1: 'abcdefg',
+      name2: 'abcdefg'
+    })
+    assert.equal(r.name1.hasError, false, 't1 OK')
+    assert.equal(r.name2.hasError, true, 't1 error')
+  })
 })

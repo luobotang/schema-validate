@@ -1,4 +1,4 @@
-/* @luobotang/schema-validate v0.1.0 */
+/* @luobotang/schema-validate v0.1.1 */
 
 'use strict';
 
@@ -70,14 +70,11 @@ Type.prototype.check = function check (value, data) {
 };
 
 Type.prototype.rule = function rule (onValid, errorMessage, priority) {
-  errorMessage = errorMessage || this._rules[0].errorMessage;
-
   if (priority) {
     this._priorityRules.push({ onValid: onValid, errorMessage: errorMessage });
   } else {
     this._rules.push({ onValid: onValid, errorMessage: errorMessage });
   }
-
   return this
 };
 
@@ -88,6 +85,22 @@ Type.prototype.required = function required (errorMessage, trim) {
   this._trim = trim;
   this._requiredMessage = errorMessage;
   return this
+};
+
+/**
+ * 复制当前对象，得到新的 Type 实例对象，便于复用已有 Type
+ */
+Type.prototype.clone = function clone () {
+  var t = this;
+  var n = {};
+  Object.setPrototypeOf(n, Object.getPrototypeOf(t)); // 配置继承关系
+  n.name = t.name;
+  n._required = t._required;
+  n._requiredMessage = t._requiredMessage;
+  n._trim = t._trim;
+  n._rules = t._rules.concat();
+  n._priorityRules = t._priorityRules.concat();
+  return n
 };
 
 var Type_1 = Type;
@@ -124,8 +137,8 @@ var StringType = /*@__PURE__*/(function (Type) {
     return this.rule(function (v) { return /[0-9]/.test(v); }, errorMessage)
   };
 
-  StringType.prototype.oneOf = function oneOf (strArr, errorMessage) {
-    return this.rule(function (v) { return !!~strArr.indexOf(v); }, errorMessage)
+  StringType.prototype.oneOf = function oneOf (list, errorMessage) {
+    return this.rule(function (v) { return list.indexOf(v) !== -1; }, errorMessage)
   };
 
   StringType.prototype.email = function email (errorMessage) {
@@ -183,13 +196,15 @@ Schema.prototype.getKeys = function getKeys () {
 
 Schema.prototype.checkForField = function checkForField (fieldName, fieldValue, data) {
   var fieldChecker = this.schema[fieldName];
-  if (!fieldChecker) {
-    // fieldValue can be anything if no schema defined
-    return { hasError: false }
-  }
+  if (!fieldChecker) { return { hasError: false } }
   return fieldChecker.check(fieldValue, data)
 };
 
+/**
+ * 检查整个对象，返回各个属性的检查结果
+ * 
+ * { name: 'abc', age: 18 } => { name: { hasError: false }, age: { hasError: true, errorMessage: 'xxx' } }
+ */
 Schema.prototype.check = function check (data) {
     var this$1 = this;
 
@@ -198,6 +213,24 @@ Schema.prototype.check = function check (data) {
     checkResult[key] = this$1.checkForField(key, data[key], data);
   });
   return checkResult
+};
+
+/**
+ * 检查整个对象，返回第一个检查失败的属性及结果
+ * 
+ * { name: 'abc', age: 18 } => { hasError: true, errorMessage: 'xxx', field: 'age' }
+ */
+Schema.prototype.validate = function validate (data) {
+  for (var i = 0, list = Object.keys(this.schema); i < list.length; i += 1) {
+    var field = list[i];
+
+      var result = this.checkForField(field, data[field], data);
+    if (result.hasError) {
+      result.field = field;
+      return result
+    }
+  }
+  return { hasError: false }
 };
 
 var Schema_2 = Schema;
@@ -222,19 +255,12 @@ var Schema_1 = {
 	SchemaModel: SchemaModel_1
 };
 
-function FN(value) {
-  return +value
-}
-
-/**
- * TODO 貌似 NumberType 校验的数据可以是 String 类型，这个会不会有点奇怪？
- */
 var NumberType = /*@__PURE__*/(function (Type) {
   function NumberType(errorMessage) {
     if ( errorMessage === void 0 ) errorMessage = 'Please enter a valid number';
 
     Type.call(this, 'number');
-    this.rule(function (value) { return /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(value); }, errorMessage);
+    this.rule(function (value) { return typeof value === 'number'; }, errorMessage);
   }
 
   if ( Type ) NumberType.__proto__ = Type;
@@ -242,27 +268,23 @@ var NumberType = /*@__PURE__*/(function (Type) {
   NumberType.prototype.constructor = NumberType;
 
   NumberType.prototype.integer = function integer (errorMessage) {
-    return this.rule(function (value) { return /^-?\d+$/.test(value); }, errorMessage)
-  };
-
-  NumberType.prototype.pattern = function pattern (regexp, errorMessage) {
-    return this.rule(function (value) { return regexp.test(value); }, errorMessage)
-  };
-
-  NumberType.prototype.oneOf = function oneOf (list, errorMessage) {
-    return this.rule(function (value) { return list.includes(FN(value)); }, errorMessage)
+    return this.rule(function (value) { return value.toString().indexOf('.') === -1; }, errorMessage)
   };
 
   NumberType.prototype.range = function range (min, max, errorMessage) {
-    return this.rule(function (value) { return FN(value) >= min && FN(value) <= max; }, errorMessage)
+    return this.rule(function (value) { return value >= min && value <= max; }, errorMessage)
   };
 
   NumberType.prototype.min = function min (min$1, errorMessage) {
-    return this.rule(function (value) { return FN(value) >= min$1; }, errorMessage)
+    return this.rule(function (value) { return value >= min$1; }, errorMessage)
   };
 
   NumberType.prototype.max = function max (max$1, errorMessage) {
-    return this.rule(function (value) { return FN(value) <= max$1; }, errorMessage)
+    return this.rule(function (value) { return value <= max$1; }, errorMessage)
+  };
+
+  NumberType.prototype.oneOf = function oneOf (list, errorMessage) {
+    return this.rule(function (value) { return list.indexOf(value) !== -1; }, errorMessage)
   };
 
   return NumberType;
@@ -300,21 +322,22 @@ var DateType = /*@__PURE__*/(function (Type) {
   DateType.prototype.constructor = DateType;
 
   DateType.prototype.range = function range (min, max, errorMessage) {
-    this.rule(
+    return this.rule(
       function (value) { return new Date(value) >= new Date(min) && new Date(value) <= new Date(max); },
       errorMessage
-    );
-    return this
+    )
   };
 
   DateType.prototype.min = function min (min$1, errorMessage) {
-    this.rule(function (value) { return new Date(value) >= new Date(min$1); }, errorMessage);
-    return this
+    return this.rule(function (value) { return new Date(value) >= new Date(min$1); }, errorMessage)
   };
 
   DateType.prototype.max = function max (max$1, errorMessage) {
-    this.rule(function (value) { return new Date(value) <= new Date(max$1); }, errorMessage);
-    return this
+    return this.rule(function (value) { return new Date(value) <= new Date(max$1); }, errorMessage)
+  };
+
+  DateType.prototype.strict = function strict (errorMessage) {
+    return this.rule(function (value) { return Object.prototype.toString.call(value) === '[object Date]'; }, errorMessage)
   };
 
   return DateType;
@@ -346,7 +369,7 @@ var ObjectType = /*@__PURE__*/(function (Type) {
       var valids = Object.entries(types).map(function (item) {
         var key = item[0];
         var type = item[1];
-        return type.check(values[key])
+        return type.check(values[key], values)
       });
 
       var errors = valids.filter(function (item) { return item.hasError; }) || [];
@@ -443,6 +466,38 @@ var ArrayType = /*@__PURE__*/(function (Type) {
 
 var ArrayType_1 = function (errorMessage) { return new ArrayType(errorMessage); };
 
+var AnyType = /*@__PURE__*/(function (Type) {
+  function AnyType() {
+    var types = [], len = arguments.length;
+    while ( len-- ) types[ len ] = arguments[ len ];
+
+    Type.call(this, 'any');
+    this.rule(function (value, data) {
+      var result;
+      for (var i = 0, list = types; i < list.length; i += 1) {
+        var type = list[i];
+
+        result = type.check(value, data);
+        if (!result.hasError) { return result }
+      }
+      return result
+    }, null);
+  }
+
+  if ( Type ) AnyType.__proto__ = Type;
+  AnyType.prototype = Object.create( Type && Type.prototype );
+  AnyType.prototype.constructor = AnyType;
+
+  return AnyType;
+}(Type_1));
+
+var AnyType_1 = function () {
+  var types = [], len = arguments.length;
+  while ( len-- ) types[ len ] = arguments[ len ];
+
+  return new (Function.prototype.bind.apply( AnyType, [ null ].concat( types) ));
+};
+
 var Schema$1 = Schema_1.Schema;
 var SchemaModel$1 = Schema_1.SchemaModel;
 
@@ -455,7 +510,8 @@ var T = {
   boolean: BooleanType_1,
   date: DateType_1,
   object: ObjectType_1,
-  array: ArrayType_1
+  array: ArrayType_1,
+  any: AnyType_1
 };
 
 var lib = {

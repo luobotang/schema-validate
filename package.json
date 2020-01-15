@@ -1,6 +1,6 @@
 {
   "name": "@luobotang/schema-validate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "data validate",
   "main": "index.js",
   "scripts": {
