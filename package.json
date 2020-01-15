@@ -4,7 +4,8 @@
   "description": "data validate",
   "main": "index.js",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "test": "mocha"
   },
   "keywords": [
     "schema",
@@ -17,6 +18,7 @@
   "devDependencies": {
     "@rollup/plugin-buble": "^0.21.0",
     "@rollup/plugin-commonjs": "^11.0.1",
+    "mocha": "^7.0.0",
     "rollup": "^1.29.0"
   }
 }
