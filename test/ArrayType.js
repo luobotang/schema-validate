@@ -32,9 +32,9 @@ describe('ArrayType', () => {
       {hasError: false},
       'OK'
     )
-    assert.deepEqual(
-      t.check([{name: 0, age: 18}]),
-      {hasError: true, errorMessage: 'string'},
+    assert.equal(
+      t.check([{name: 0, age: 18}]).hasError,
+      true,
       'X - string'
     )
     assert.deepEqual(
