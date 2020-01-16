@@ -9,7 +9,7 @@ describe('StringType', () => {
     assert.equal(typeof t.required, 'function', 't.required()')
   })
 
-  it('rules', () => {
+  it('rules with no args', () => {
     function checkRule(ruleName, success, fail) {
       const t = StringType()
       assert.equal(t[ruleName]('error').check(success).hasError, false, `${ruleName}() check '${success}' should not hasError`)
@@ -24,8 +24,24 @@ describe('StringType', () => {
     checkRule('email', 'abc@123.com', 'abc')
     checkRule('url', 'http://abc.com/123.html', 'abc')
     checkRule('hex', '#fff', 'abcd')
+    checkRule('isInteger', '123', '12.3')
+    checkRule('isNumber', '12.3', 'abc')
+    checkRule('isFloat', '12.3', '123')
+    checkRule('isDouble', '12.3', '123')
+  })
 
-    // TODO 其他需要额外参数的规则
+  it('rules with one args', () => {
+    function checkRule(ruleName, arg, success, fail) {
+      const t = StringType()
+      assert.equal(t[ruleName](arg).check(success).hasError, false, `${ruleName}() check '${success}' should not hasError`)
+      assert.equal(t[ruleName](arg).check(fail).hasError, true, `${ruleName}() check '${fail}' should hasError`)
+    }
+
+    checkRule('oneOf', ['a', 'b', 'c'], 'a', 'd')
+    checkRule('pattern', /abc/, 'abc', 'def')
+    checkRule('minlen', 2, 'abc', 'a')
+    checkRule('maxlen', 2, 'a', 'abc')
+    checkRule('length', 2, 'ab', 'a')
   })
 
   it('.same()', () => {
