@@ -1,4 +1,4 @@
-/* @luobotang/schema-validate v0.1.5 */
+/*! @luobotang/schema-validate v0.1.5 */
 
 var SchemaValidate = (function (exports) {
   'use strict';
