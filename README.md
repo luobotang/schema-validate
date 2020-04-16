@@ -4,7 +4,7 @@
 
 ## API
 
-### class Schema
+### Schema
 
 构造函数：
 
@@ -70,3 +70,88 @@ CheckResult 数据结构：
 - ```type.required(errorMessage = '不能为空', trim = true)```: 设置当前数据项不能为空，数据校验时进行非空校验
 - ```type.desc(desc)```: 设置用于错误信息的数据描述
 - ```type.clone()```: 复制得到当前类型对象的副本实例
+
+### StringType
+
+校验方法都返回当前对象，方便链式调用。校验方法的 errorMessage 都有缺省值。
+
+校验方法：
+- ```hasLetter(errorMessage)```
+- ```hasUppercaseLetter(errorMessage)```
+- ```hasLowercaseLetter(errorMessage)```
+- ```letterOnly(errorMessage)```
+- ```hasNumber(errorMessage)```
+- ```numberOnly(errorMessage)```
+- ```isInteger(errorMessage)```
+- ```isNumber(errorMessage)```
+- ```numberOnly(errorMessage)```
+- ```isInteger(errorMessage)```
+- ```isNumber(errorMessage)```
+- ```isFloat(errorMessage)```
+- ```isDouble(errorMessage)```
+- ```oneOf(list, errorMessage)```
+- ```email(errorMessage)```
+- ```ip(errorMessage)```
+- ```url(errorMessage)```
+- ```hex(errorMessage)```
+- ```pattern(regex, errorMessage)```: 通过传入的正则表达式对数据进行校验
+- ```range(min, max, errorMessage)```
+- ```minlen(min, errorMessage)```
+- ```maxlen(max, errorMessage)```
+- ```length(len, errorMessage)```
+- ```same(field, errorMessage)```: 与当前对象中其他字段值进行比对，不一致返回错误
+
+### NumberType
+
+校验方法：
+
+- ```integer(errorMessage)```
+- ```range(min, max, errorMessage)```
+- ```min(min, errorMessage)```
+- ```max(max, errorMessage)```
+- ```oneOf(list, errorMessage)```
+
+### DateType
+
+对可以转为合法日期的字符串、数值、日期对象进行校验，如果需要严格约定类型，可以添加 ```date.strict()``` 规则进行约束。
+
+校验方法：
+
+- ```range(min, max, errorMessage)```
+- ```min(min, errorMessage)```
+- ```max(max, errorMessage)```
+- ```strict(errorMessage)```
+
+### ObjectType
+
+声明嵌套对象，使用方式：
+
+```js
+SchemaModel({
+  name: T.string('姓名').require(),
+  address: T.object('地址').required().shape({
+    province: T.string('省份').required(),
+    city: T.string('城市').required()
+  })
+})
+```
+
+### ArrayType
+
+校验方法：
+
+- ```range(min, max, errorMessage)```
+- ```minlen(min, errorMessage)```
+- ```maxlen(max, errorMessage)```
+- ```length(len, errorMessage)```
+- ```unique(errorMessage)```
+- ```uniqueKey(key, errorMessage)```
+- ```of(type)```
+
+其中 ```of(type)``` 用于对数组元素类型进行校验，例如：
+
+```js
+SchemaModel({
+  users: T.array('用户列表').of(T.string('用户名'))
+})
+```
