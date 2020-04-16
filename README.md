@@ -2,6 +2,32 @@
 
 数据模型声明及校验工具，借鉴了 [rsuite/schema-typed](https://github.com/rsuite/schema-typed) 项目。
 
+## 使用
+
+通过为数据声明模型（Schema），再基于模型对数据进行校验。
+
+```js
+import { SchemaModel, T } from '@luobotang/schema-validate'
+
+const model = SchemaModel({
+  name: T.string('姓名').required(),
+  age: T.number('年龄').range(18, 30)
+})
+
+model.check({
+  name: 'foo',
+  age: 40
+})
+
+// 结果：
+// {
+//   name: { hasError: false },
+//   age: { hasError: true, errorMessage: '年龄应在 18 到 30 之间' }
+// }
+```
+
+```SchemaModel``` 用于声明模型，```T.string``` 等用于声明不同数据类型校验对象。
+
 ## API
 
 ### Schema
