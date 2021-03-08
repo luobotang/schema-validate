@@ -25,6 +25,7 @@ describe('StringType', () => {
     checkRule('url', 'http://abc.com/123.html', 'abc')
     checkRule('hex', '#fff', 'abcd')
     checkRule('isInteger', '123', '12.3')
+    checkRule('isNumber', '12', 'abc')
     checkRule('isNumber', '12.3', 'abc')
     checkRule('isFloat', '12.3', '123')
     checkRule('isDouble', '12.3', '123')
