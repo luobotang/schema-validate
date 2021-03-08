@@ -1,4 +1,4 @@
-/*! @luobotang/schema-validate v0.1.5 */
+/*! @luobotang/schema-validate v0.1.6 */
 
 'use strict';
 
@@ -159,15 +159,15 @@ var StringType = /*@__PURE__*/(function (Type) {
   };
 
   StringType.prototype.isNumber = function isNumber (errorMessage)  {
-    return this.rule(function (v) { return /^-?\d+(\.\d+)$/.test(v); }, errorMessage || '应为数值')
+    return this.rule(function (v) { return /^-?\d+(\.\d+)?$/.test(v); }, errorMessage || '应为数值')
   };
 
   StringType.prototype.isFloat = function isFloat (errorMessage)  {
-    return this.isNumber(errorMessage || '应为 Float')
+    return this.rule(function (v) { return /^-?\d+\.\d+$/.test(v); }, errorMessage || '应为 Float')
   };
 
   StringType.prototype.isDouble = function isDouble (errorMessage)  {
-    return this.isNumber(errorMessage || '应为 Double')
+    return this.isFloat(errorMessage || '应为 Double')
   };
 
   StringType.prototype.oneOf = function oneOf (list, errorMessage) {
